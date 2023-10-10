@@ -1,0 +1,93 @@
+@font-face {
+    font-family: Acumin;
+    font-weight: bold;
+    src: url("Acumin-BdPro.otf") format("opentype");
+}
+
+#app-container {
+    width: 100%;
+    max-width: none;
+}
+
+body {
+    background-color: #f9f9f9;
+    color: #333333;
+    font-size: 15px;
+    margin: 0px;
+}
+
+.mantine-Tabs-tab{
+    font-size: 20px;
+    font-weight: bold;
+}    
+.dash-upload {
+   
+}
+
+#upload_image {
+    font-size: large;
+
+}
+.mantine-Switch-label {
+    color: #f9f9f9;
+}
+
+#right_column {
+    background-color: #f4f4f4;
+    padding: 1rem 2rem;
+    min-height: calc(100vh);
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    dis
+}
+#title{
+    padding-top: 1em;
+    padding-bottom: 2em;
+}
+
+#left_column {
+    background-color: #182257;
+    color: #f4f4f4;
+    margin-top: 0px;
+    padding: 0rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items:left;
+    min-height: calc(100vh);
+
+}
+
+#results{
+    min-height: calc(100vh - 4rem);
+
+}
+#results_box {
+    background-color: #f4f4f4;
+    padding: 0.5rem 0.5rem;
+    
+    width: 100%;
+
+
+}
+
+#opex_table {
+    min-height: calc(100vh - 13rem);
+}
+
+#revenues_table {
+    min-height: calc(100vh - 13rem);
+}
+
+#all_table {
+    min-height: calc(100vh - 13rem);
+}
+
+
+#run{
+    vertical-align: middle;
+}
+
+#row_run{
+    padding-top: 20vh;
+}
