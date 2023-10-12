@@ -4,15 +4,6 @@ from dash import dcc, html
 from dash_iconify import DashIconify
 
 
-# def coordinate_input(text, id):
-#     return dbc.Row([
-#         dbc.Col([
-#             dmc.TextInput(
-#                 label=f"{text}", id=id)
-#         ])
-#     ])
-
-
 def title():
     return dbc.Row([
         dbc.Col([
@@ -55,7 +46,8 @@ def upload():
 
                 # Allow multiple files to be uploaded
                 multiple=False,
-                className="justify-content-center align-items-center vertical-align-center"
+                className="""justify-content-center align-items-center 
+                vertical-align-center"""
                 # disabled=False
             )
         ])
@@ -66,7 +58,8 @@ def run():
     return dbc.Row([
         dbc.Col([
             dmc.Center(
-                dmc.Button("Run", leftIcon=DashIconify(icon="ph:play-fill"), size="xl",
+                dmc.Button("Run", leftIcon=DashIconify(icon="ph:play-fill"),
+                           size="xl",
                    color="primary", id="run", disabled=True, loading=False,
                            )
             )
@@ -78,7 +71,6 @@ def left_panel():
     return dbc.Col([
         title(),
         upload(),
-        # image_info(),
         run()
     ],
         width=3,
