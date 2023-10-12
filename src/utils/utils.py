@@ -15,4 +15,4 @@ def generate_and_save_data_plume():
     plume_data.to_csv(output_path, index=False)
 
 
-# generate_and_save_data_plume()
+generate_and_save_data_plume()

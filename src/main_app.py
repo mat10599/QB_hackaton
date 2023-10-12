@@ -116,7 +116,7 @@ def run_prediction(content, n_clicks):
         # case1 plume is detected
         if result > 0.5:
             return html.Div([
-                html.H3(f"Model result: Plume detected (with probability {np.round(result[0], 2)[0][0]})", id="model_result"),
+                html.H3(f"Model result: Plume detected (with probability {round(float(result[0][0]), 2)})", id="model_result"), #np.round(result[0], 2)[0]
                 dbc.Row([
                     dbc.Col([dmc.TextInput(label="Latitude", id="latitude"),
                              ]),
@@ -145,7 +145,7 @@ def run_prediction(content, n_clicks):
 def update_map(n_clicks, lat, lon):
     if n_clicks:
         new_df = pd.DataFrame(
-            {"lat": [lat], "lon": [lon], "probability": [result], "detected": [False]})
+            {"lat": [lat], "lon": [lon], "probability": [result[0][0]], "detected": [False]})
         location_df = pd.read_csv(location_path)
         location_df = pd.concat([location_df, new_df], axis=0)
         location_df.to_csv(location_path, index=False)
@@ -155,4 +155,4 @@ def update_map(n_clicks, lat, lon):
 # run the app
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8888)
+    app.run_server(debug=False, port=8888)

@@ -58,7 +58,6 @@ def generate_plotly_figure(df: pd.DataFrame) -> go.Figure:
     fig = go.Figure(data=[trace_circle, trace_x])
 
     fig.update_layout(
-        title='Customized GeoScatter Plot with Legend for Symbols',
         legend=dict(
             x=0.6,  # Adjust the x position of the legend
             y=0.2,  # Adjust the y position of the legend
