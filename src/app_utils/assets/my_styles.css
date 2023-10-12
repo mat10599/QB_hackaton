@@ -45,13 +45,22 @@ body {
 #title{
     padding-top: 1em;
     padding-bottom: 5vh;
+    padding-left: 1em;
+}
+#logo{
+    margin-right: 5em;
+
+}
+
+#model_result{
+    padding-top: 1em;
 }
 
 #left_column {
     background-color: #182257;
     color: #f4f4f4;
     margin-top: 0px;
-    padding: 0rem 2rem;
+    padding: 0rem 1rem;
     display: flex;
     flex-direction: column;
     align-items:center;

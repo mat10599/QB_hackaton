@@ -1,6 +1,6 @@
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-from dash import Dash, Input, Output, State, callback, dcc, html, dash_table
+from dash import Dash, Input, Output, State, callback, dash_table, dcc, html
 from dash_iconify import DashIconify
 
 
@@ -18,13 +18,14 @@ def coordinate_input(text, id):
 #         ], id="file_name")
 #     ])
 
+
 def run():
     return dbc.Row([
         dbc.Col([
             dmc.Center(
-            dmc.Button("Run", leftIcon=DashIconify(icon="ph:play-fill"), size="xl",
+                dmc.Button("Run", leftIcon=DashIconify(icon="ph:play-fill"), size="xl",
                    color="primary", id="run", disabled=True, loading=False,
-                       )
+                           )
             )
         ])
     ], id="row_run")
@@ -56,7 +57,7 @@ def upload():
                     "height": "40vh"
 
                 },
-    
+
                 # Allow multiple files to be uploaded
                 multiple=False,
                 className="justify-content-center align-items-center vertical-align-center"
@@ -69,12 +70,12 @@ def upload():
 def title():
     return dbc.Row([
         dbc.Col([
-            html.Img(src="assets/images/logo.svg", height="100px")
+            html.Img(src="assets/images/logo.svg", height="100px", id="logo"),
         ],
-        width=1),
-    
+            width=2),
+
         dbc.Col([
-            html.H2("Methane Plume Detector Application", id="title")
+            html.H3("Methane Plume Detector Application", id="title")
         ])
     ])
 
@@ -89,6 +90,3 @@ def left_panel():
         width=3,
         id="left_column"
     )
-
-
-

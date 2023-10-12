@@ -1,22 +1,24 @@
+import base64
+import datetime
+from io import BytesIO
+
+import numpy as np 
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import pandas as pd
-from dash import Dash, Input, Output, State, callback, dcc, html, dash_table
-from dash_iconify import DashIconify
-import datetime
-import base64
-from PIL import Image
-from io import BytesIO
-from main_solution import generate_predictions
-from app_utils.left_panel import left_panel
-from app_utils.right_panel import right_panel, generate_plotly_figure
-from utils.variables import SRC_PATH
 import plotly.express as px
+from dash import Dash, Input, Output, State, callback, dash_table, dcc, html
+from dash_iconify import DashIconify
+from PIL import Image
 
+from app_utils.left_panel import left_panel
+from app_utils.right_panel import generate_plotly_figure, right_panel
+from main_solution import generate_predictions
+from utils.variables import SRC_PATH
 
 location_path = SRC_PATH/"app_utils"/"assets"/"data"/"location.csv"
 plume_df = pd.read_csv(location_path)
-
+result = None
 
 def parse_contents(content, filename):
     content_type, content_string = content.split(',')
@@ -106,13 +108,15 @@ def check_run_condition(children):
     State("upload_image", "contents"),
     Input("run", "n_clicks"),
 )
-def run_prediction(n_clicks, content):
+def run_prediction(content, n_clicks):
+    global result
     if n_clicks:
-        result = generate_predictions(content, model_path=None)
+        content_type, content_string = content.split(',')
+        result = generate_predictions(content_string)
         # case1 plume is detected
-        if result == 1:
+        if result > 0.5:
             return html.Div([
-                html.H3("Model result: Plume detected"),
+                html.H3(f"Model result: Plume detected (with probability {np.round(result[0], 2)[0][0]})", id="model_result"),
                 dbc.Row([
                     dbc.Col([dmc.TextInput(label="Latitude", id="latitude"),
                              ]),
@@ -141,7 +145,7 @@ def run_prediction(n_clicks, content):
 def update_map(n_clicks, lat, lon):
     if n_clicks:
         new_df = pd.DataFrame(
-            {"lat": [lat], "lon": [lon], "probability": [0.75], "detected": [False]})
+            {"lat": [lat], "lon": [lon], "probability": [result], "detected": [False]})
         location_df = pd.read_csv(location_path)
         location_df = pd.concat([location_df, new_df], axis=0)
         location_df.to_csv(location_path, index=False)

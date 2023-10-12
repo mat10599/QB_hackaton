@@ -1,5 +1,5 @@
-import pandas as pd 
 import numpy as np
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from variables import DATA_PATH, SRC_PATH
@@ -15,4 +15,4 @@ def generate_and_save_data_plume():
     plume_data.to_csv(output_path, index=False)
 
 
-generate_and_save_data_plume()
+# generate_and_save_data_plume()

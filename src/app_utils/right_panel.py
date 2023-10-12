@@ -1,12 +1,13 @@
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-from dash import Dash, Input, Output, State, callback, dcc, html, dash_table
-from dash_iconify import DashIconify
-from utils.variables import SRC_PATH
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import numpy as np
+from dash import Dash, Input, Output, State, callback, dash_table, dcc, html
+from dash_iconify import DashIconify
+
+from utils.variables import SRC_PATH
 
 location_data_path = SRC_PATH / "app_utils" / "assets" / "data" / "location.csv"
 temp_data_path = SRC_PATH / "app_utils" / \
