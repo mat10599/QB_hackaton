@@ -164,7 +164,7 @@ def run_prediction(content, n_clicks):
                 # np.round(result[0], 2)[0]
                 html.H3(
                     f"""Model result: Plume detected (with probability {
-                        round(float(result[0][0]), 2)}""", id="model_result"),
+                        round(float(result[0][0]), 2)})""", id="model_result"),
                 dbc.Row([
                     dbc.Col([dmc.TextInput(label="Latitude", id="latitude"),
                              ]),
