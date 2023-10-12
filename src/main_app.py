@@ -7,6 +7,15 @@ import datetime
 import base64
 from PIL import Image
 from io import BytesIO
+from main_solution import generate_predictions
+from app_utils.left_panel import left_panel
+from app_utils.right_panel import right_panel, generate_plotly_figure
+from utils.variables import SRC_PATH
+import plotly.express as px
+
+
+location_path = SRC_PATH/"app_utils"/"assets"/"data"/"location.csv"
+plume_df = pd.read_csv(location_path)
 
 
 def parse_contents(content, filename):
@@ -17,154 +26,70 @@ def parse_contents(content, filename):
     # Check if the image is TIF, and convert it to RGB if necessary
     if image.format == 'TIFF':
         image = image.convert('RGB')
-    
+
     buffered = BytesIO()
     image.save(buffered, format="PNG")
-    img_str = "data:image/png;base64," + base64.b64encode(buffered.getvalue()).decode()
+    img_str = "data:image/png;base64," + \
+        base64.b64encode(buffered.getvalue()).decode()
     return html.Div([
-        html.H5(filename),
+        html.Div(
+            [html.H5(filename)],
+            style={"justify-content": "center", "display": "flex"}, id="image_container"),
 
-        # HTML images accept base64 encoded strings in the same format
-        # that is supplied by the upload
-        # transform tif content into png content
-        
         html.Div([
-        html.Img(src=img_str, style={'width': '500px', 'height': 'auto'}),
-        ], style={"justify-content": "center", "display": "flex"}),
+            html.Img(src=img_str, style={'width': 'auto', 'height': '50vh'}),
+        ], style={"justify-content": "center", "display": "flex"}, id="image_container")
 
     ])
-
-
-def result():
-    return dbc.Card([
-
-        dmc.Tabs([
-            dmc.TabsList([
-                dmc.Tab(
-                    "Image",
-                    icon=DashIconify(icon="ri:image-line"),
-                    value="image",
-                ),
-                dmc.Tab(
-                    "Global Map",
-                    icon=DashIconify(icon="mingcute:earth-2-line"),
-                    value="global_map",
-                ),
-            ]),
-            dmc.TabsPanel(value="image", id="image_tab"),
-            dmc.TabsPanel(value="global_map", id="global_map_tab")
-        ],
-            value="image",
-        )
-    ], id="results")
-
-
-def coordinate_input(text, id):
-    return dbc.Row([
-        dbc.Col([
-            dmc.TextInput(
-                label=f"{text}", id=id)
-        ])
-    ])
-
-
-def run():
-    return dbc.Row([
-        dbc.Col([
-            dmc.Center(
-            dmc.Button("Run", leftIcon=DashIconify(icon="ph:play-fill"), size="xl",
-                   color="primary", id="run", disabled=True, loading=False,
-                       )
-            )
-        ])
-    ], id="row_run")
-
-
-def upload():
-    return dbc.Row([
-        dbc.Col([
-            dcc.Upload(
-                id="upload_image",
-                children=html.Div([
-                    'Drag and Drop',
-                    html.Br(),
-                    "Or ",
-                    html.Br(),
-                    html.A('Select Image', style={
-                           "text-decoration": "underline"})
-                ]),
-                style={
-                    'min-height': '300px',
-                    'lineHeight': '45px',
-                    'borderWidth': '1px',
-                    'borderStyle': 'dashed',
-                    'borderRadius': '5px',
-                    'textAlign': 'center',
-                    'margin': '10px',
-                    'display': 'flex',
-                    "font-size": "25px"
-
-                },
-    
-                # Allow multiple files to be uploaded
-                multiple=False,
-                className="justify-content-center align-items-center vertical-align-center"
-                # disabled=False
-            )
-        ])
-    ])
-
-
-def left_panel():
-    return dbc.Col([
-        html.H1("Methane Plume Detector Application", id="title"),
-        upload(),
-        run()
-    ],
-        width=3,
-        id="left_column"
-    )
-
-
-def right_panel():
-    return dbc.Col([
-        result()
-    ], id="right_column")
 
 
 app = Dash(__name__, external_stylesheets=[
-           dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP],
-           #    suppress_callback_exceptions=True,  # comment this line if you want
-           #    # to see callback exceptions
-           update_title=None,
-           #    meta_tags=[{"name": "viewport",
-           #                "content": "width=device-width, initial-scale=1"}],
-           assets_folder="app_utils/assets"
+    dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP],
+    suppress_callback_exceptions=True,  # comment this line if you want
+    #    # to see callback exceptions
+    update_title=None,
 
-           )
+    #    meta_tags=[{"name": "viewport",
+    #                "content": "width=device-width, initial-scale=1"}],
+    assets_folder="app_utils/assets"
+
+)
 
 app.layout = dbc.Container(
-    [
+    [dcc.Input(id='dummy', type='hidden', value=None),
         dbc.Row([
             left_panel(),
             right_panel()
         ])
-    ], fluid=True,
+     ], fluid=True,
     id='app-container')
 
-app.title = "QR plume detection"
+app.title = "METHALLITE"
 
 
 ########## apps callbacks ##########
 
-@callback(Output('image_tab', 'children'),
-              Input('upload_image', 'contents'),
-              State('upload_image', 'filename')
+@callback(
+    Output("global_map_tab", "children"),
+    Input("dummy", "value")
 )
-def update_output(content, name):
+def initialize_graph(dummy):
+    if dummy is None:
+        return dcc.Graph(figure=generate_plotly_figure(plume_df), style={'width': '100%', 'height': '90vh'}, config={"scrollZoom": False})
+
+
+@callback(
+    Output('image_tab', 'children'),
+    Input('upload_image', 'contents'),
+    State('upload_image', 'filename')
+)
+def update_image(content, name):
     if content is not None:
         children = parse_contents(content, name)
         return children
+    else:
+        return None
+
 
 @callback(
     Output("run", "disabled"),
@@ -175,9 +100,52 @@ def check_run_condition(children):
         return False
     return True
 
+
 @callback(
-    Output("")
+    Output("model_result_tab", "children"),
+    State("upload_image", "contents"),
+    Input("run", "n_clicks"),
 )
+def run_prediction(n_clicks, content):
+    if n_clicks:
+        result = generate_predictions(content, model_path=None)
+        # case1 plume is detected
+        if result == 1:
+            return html.Div([
+                html.H3("Model result: Plume detected"),
+                dbc.Row([
+                    dbc.Col([dmc.TextInput(label="Latitude", id="latitude"),
+                             ]),
+                    dbc.Col([dmc.TextInput(label="Longitude", id="longitude"),
+                             ]),
+                ]),
+             
+                dmc.Button("Add to map", leftIcon=DashIconify(
+                    icon="pepicons-pop:pinpoint-circle"), color="secondary", size="sm", id="add_to_map")
+            ])
+
+        else:
+            # case no plume is detected on the image
+            return html.Div([
+                html.H3("Model result: No Plume detected"),
+            ])
+
+
+@callback(
+    Output("global_map_tab", "children",  allow_duplicate=True),
+    Input("add_to_map", "n_clicks"),
+    State("latitude", "value"),
+    State("longitude", "value"),
+    prevent_initial_call=True
+)
+def update_map(n_clicks, lat, lon):
+    if n_clicks:
+        new_df = pd.DataFrame(
+            {"lat": [lat], "lon": [lon], "probability": [0.75], "detected": [False]})
+        location_df = pd.read_csv(location_path)
+        location_df = pd.concat([location_df, new_df], axis=0)
+        location_df.to_csv(location_path, index=False)
+        return dcc.Graph(figure=generate_plotly_figure(location_df), style={'width': '100%', 'height': '90vh'}, config={"scrollZoom": False})
 
 
 # run the app
