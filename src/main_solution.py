@@ -1,13 +1,11 @@
-from pathlib import Path
-
-import numpy as np
-import pandas as pd
-import tensorflow as tf
-from PIL import Image
 import base64
 from io import BytesIO
 
-from utils.variables import DATA_PATH, MODEL_PATH
+import numpy as np
+import tensorflow as tf
+from PIL import Image
+
+from utils.variables import MODEL_PATH
 
 
 def generate_predictions(image, model_name: str = "model_vgg16.h5"):
@@ -35,7 +33,7 @@ def preprocess_image(image):
     Returns:
         _type_: preprocessed image as an array of shape (1, 64, 64, 3)
     """
-    
+
     decoded = base64.b64decode(image)
     image = Image.open(BytesIO(decoded))
     image = image.convert('RGB')
@@ -57,4 +55,3 @@ def load_model(model_file):
     model_path = MODEL_PATH / model_file
     model = tf.keras.models.load_model(model_path)
     return model
-
