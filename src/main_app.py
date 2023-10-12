@@ -1,13 +1,13 @@
 import base64
-import datetime
+
 from io import BytesIO
 
-import numpy as np 
+
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import pandas as pd
-import plotly.express as px
-from dash import Dash, Input, Output, State, callback, dash_table, dcc, html
+
+from dash import Dash, Input, Output, State, callback, dcc, html
 from dash_iconify import DashIconify
 from PIL import Image
 
@@ -16,11 +16,25 @@ from app_utils.right_panel import generate_plotly_figure, right_panel
 from main_solution import generate_predictions
 from utils.variables import SRC_PATH
 
+# define useful variables and paths
 location_path = SRC_PATH/"app_utils"/"assets"/"data"/"location.csv"
 plume_df = pd.read_csv(location_path)
 result = None
 
+# helper function
+
+
 def parse_contents(content, filename):
+    """parse the content of the dash uploader and transform the greyscale
+    image to RGB
+
+    Args:
+        content (_type_): content of the dcc uploder
+        filename (_type_): name of the file being uploaded
+
+    Returns:
+        html.Div: html div containing the image and its title
+    """
     content_type, content_string = content.split(',')
     decoded = base64.b64decode(content_string)
     image = Image.open(BytesIO(decoded))
@@ -36,23 +50,22 @@ def parse_contents(content, filename):
     return html.Div([
         html.Div(
             [html.H5(filename)],
-            style={"justify-content": "center", "display": "flex"}, id="image_container"),
+            style={"justify-content": "center", "display": "flex"},
+            id="image_container"),
 
         html.Div([
             html.Img(src=img_str, style={'width': 'auto', 'height': '50vh'}),
-        ], style={"justify-content": "center", "display": "flex"}, id="image_container")
+        ], style={"justify-content": "center", "display": "flex"},
+            id="image_container")
 
     ])
 
 
+# define the app
 app = Dash(__name__, external_stylesheets=[
     dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP],
-    suppress_callback_exceptions=True,  # comment this line if you want
-    #    # to see callback exceptions
+    suppress_callback_exceptions=True,
     update_title=None,
-
-    #    meta_tags=[{"name": "viewport",
-    #                "content": "width=device-width, initial-scale=1"}],
     assets_folder="app_utils/assets"
 
 )
@@ -66,18 +79,30 @@ app.layout = dbc.Container(
      ], fluid=True,
     id='app-container')
 
-app.title = "METHALLITE"
+app.title = "Methallite"
 
 
-########## apps callbacks ##########
+# apps callbacks #
 
 @callback(
     Output("global_map_tab", "children"),
     Input("dummy", "value")
 )
 def initialize_graph(dummy):
+    """takes the content of dummy object and return the inital
+    graph. This graph contains the historical data with the plume data
+    previously added by the user using the app
+
+    Args:
+        dummy (str): None if initialization step else "dummy"
+
+    Returns:
+        _type_: the inital graph
+    """
     if dummy is None:
-        return dcc.Graph(figure=generate_plotly_figure(plume_df), style={'width': '100%', 'height': '90vh'}, config={"scrollZoom": False})
+        return dcc.Graph(figure=generate_plotly_figure(plume_df),
+                         style={'width': '100%', 'height': '90vh'},
+                         config={"scrollZoom": False})
 
 
 @callback(
@@ -86,6 +111,15 @@ def initialize_graph(dummy):
     State('upload_image', 'filename')
 )
 def update_image(content, name):
+    """prints the image in the result image tab
+
+    Args:
+        content (_type_): image description
+        name (str): name of the file
+
+    Returns:
+        html.Div: the image and the file name
+    """
     if content is not None:
         children = parse_contents(content, name)
         return children
@@ -98,6 +132,8 @@ def update_image(content, name):
     Input("image_tab", "children"),
 )
 def check_run_condition(children):
+    """checks that the image has been uploaded before enabling the run button
+    """
     if children is not None:
         return False
     return True
@@ -109,6 +145,15 @@ def check_run_condition(children):
     Input("run", "n_clicks"),
 )
 def run_prediction(content, n_clicks):
+    """runs model prediction when the user clicks on run button
+
+    Args:
+        content (_type_): image object
+        n_clicks (int): number of clicks on the run button
+
+    Returns:
+        html.Div: Model result
+    """
     global result
     if n_clicks:
         content_type, content_string = content.split(',')
@@ -116,16 +161,20 @@ def run_prediction(content, n_clicks):
         # case1 plume is detected
         if result > 0.5:
             return html.Div([
-                html.H3(f"Model result: Plume detected (with probability {round(float(result[0][0]), 2)})", id="model_result"), #np.round(result[0], 2)[0]
+                # np.round(result[0], 2)[0]
+                html.H3(
+                    f"""Model result: Plume detected (with probability {
+                        round(float(result[0][0]), 2)}""", id="model_result"),
                 dbc.Row([
                     dbc.Col([dmc.TextInput(label="Latitude", id="latitude"),
                              ]),
                     dbc.Col([dmc.TextInput(label="Longitude", id="longitude"),
                              ]),
                 ]),
-             
+
                 dmc.Button("Add to map", leftIcon=DashIconify(
-                    icon="pepicons-pop:pinpoint-circle"), color="secondary", size="sm", id="add_to_map")
+                    icon="pepicons-pop:pinpoint-circle"), color="secondary",
+                    size="sm", id="add_to_map")
             ])
 
         else:
@@ -142,14 +191,27 @@ def run_prediction(content, n_clicks):
     State("longitude", "value"),
     prevent_initial_call=True
 )
-def update_map(n_clicks, lat, lon):
+def update_map(n_clicks, lat, lon) -> dcc.Graph:
+    """updates the graph by adding the new plume location
+
+    Args:
+        n_clicks int): num of clicks on the add to map button
+        lat (float): latitude of the plume
+        lon (float): longitude of the plume
+
+    Returns:
+        dcc.Graph: Graph object
+    """
     if n_clicks:
         new_df = pd.DataFrame(
-            {"lat": [lat], "lon": [lon], "probability": [result[0][0]], "detected": [False]})
+            {"lat": [lat], "lon": [lon], "probability": [result[0][0]],
+             "detected": [False]})
         location_df = pd.read_csv(location_path)
         location_df = pd.concat([location_df, new_df], axis=0)
         location_df.to_csv(location_path, index=False)
-        return dcc.Graph(figure=generate_plotly_figure(location_df), style={'width': '100%', 'height': '90vh'}, config={"scrollZoom": False})
+        return dcc.Graph(figure=generate_plotly_figure(location_df),
+                         style={'width': '100%', 'height': '90vh'},
+                         config={"scrollZoom": False})
 
 
 # run the app

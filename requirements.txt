@@ -6,3 +6,4 @@ dash-iconify==0.1.2
 dash-mantine-components==0.12.1
 Pillow==10.0.1
 tensorflow==2.14.0
+nbformat==5.9.2

@@ -1,27 +1,29 @@
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-import numpy as np
+
 import pandas as pd
-import plotly.express as px
+
 import plotly.graph_objects as go
-from dash import Dash, Input, Output, State, callback, dash_table, dcc, html
+
 from dash_iconify import DashIconify
 
 from utils.variables import SRC_PATH
 
-location_data_path = SRC_PATH / "app_utils" / "assets" / "data" / "location.csv"
+location_data_path = SRC_PATH / "app_utils" / "assets" / "data" /\
+    "location.csv"
 temp_data_path = SRC_PATH / "app_utils" / \
     "assets" / "data" / "temp_location.csv"
 
-# if 'df' in globals():
-#     pass
-# else:
-#     df = pd.read_csv(location_data_path)
-
-# fig = go.Figure()
-
 
 def generate_plotly_figure(df: pd.DataFrame) -> go.Figure:
+    """generate the geoscatter plot of the plumes
+
+    Args:
+        df (pd.DataFrame): dataframe containing the plume data
+
+    Returns:
+        go.Figure: plotly figure
+    """
 
     trace_circle = go.Scattergeo(
         lon=df.loc[df['detected'], 'lon'],
@@ -33,7 +35,6 @@ def generate_plotly_figure(df: pd.DataFrame) -> go.Figure:
             symbol='square',
             opacity=0.6,
             size=7,
-            reversescale=True,
         ),
         name='Known Plume'
     )
@@ -44,7 +45,7 @@ def generate_plotly_figure(df: pd.DataFrame) -> go.Figure:
         text=df.loc[~df['detected'], 'probability'],
         mode='markers',
         marker=dict(
-            color=df['probability'],
+            color=df.loc[~df['detected'], 'probability'],
             symbol="circle",
             colorscale='Plotly3',
             opacity=0.8,
@@ -65,26 +66,6 @@ def generate_plotly_figure(df: pd.DataFrame) -> go.Figure:
         )
     )
     return fig
-
-
-# fig.add_trace(go.Scattergeo(
-#     lon=df['lon'],
-#     lat=df['lat'],
-#     text=df['probability'],
-#     mode='markers',
-#     marker=dict(
-#         color=df['probability'],
-#         colorscale='aggrnyl',
-#         opacity=0.5,
-#         cmin=0.5,
-#         cmax=1,
-#         colorbar=dict(title='Probability'),
-#         size=7,
-#         reversescale=True,
-#         symbol=["circle" if detected else "square" for detected in df["detected"]],
-
-#         )
-#     ))
 
 
 def result():

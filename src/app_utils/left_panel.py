@@ -1,34 +1,29 @@
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-from dash import Dash, Input, Output, State, callback, dash_table, dcc, html
+from dash import dcc, html
 from dash_iconify import DashIconify
 
 
-def coordinate_input(text, id):
-    return dbc.Row([
-        dbc.Col([
-            dmc.TextInput(
-                label=f"{text}", id=id)
-        ])
-    ])
-
-# def image_info():
+# def coordinate_input(text, id):
 #     return dbc.Row([
 #         dbc.Col([
-#         ], id="file_name")
+#             dmc.TextInput(
+#                 label=f"{text}", id=id)
+#         ])
 #     ])
 
 
-def run():
+def title():
     return dbc.Row([
         dbc.Col([
-            dmc.Center(
-                dmc.Button("Run", leftIcon=DashIconify(icon="ph:play-fill"), size="xl",
-                   color="primary", id="run", disabled=True, loading=False,
-                           )
-            )
+            html.Img(src="assets/images/logo.svg", height="100px", id="logo"),
+        ],
+            width=2),
+
+        dbc.Col([
+            html.H3("Methane Plume Detector Application", id="title")
         ])
-    ], id="row_run")
+    ])
 
 
 def upload():
@@ -67,17 +62,16 @@ def upload():
     ])
 
 
-def title():
+def run():
     return dbc.Row([
         dbc.Col([
-            html.Img(src="assets/images/logo.svg", height="100px", id="logo"),
-        ],
-            width=2),
-
-        dbc.Col([
-            html.H3("Methane Plume Detector Application", id="title")
+            dmc.Center(
+                dmc.Button("Run", leftIcon=DashIconify(icon="ph:play-fill"), size="xl",
+                   color="primary", id="run", disabled=True, loading=False,
+                           )
+            )
         ])
-    ])
+    ], id="row_run")
 
 
 def left_panel():
