@@ -46,7 +46,7 @@ def upload():
 
                 # Allow multiple files to be uploaded
                 multiple=False,
-                className="""justify-content-center align-items-center 
+                className="""justify-content-center align-items-center
                 vertical-align-center"""
                 # disabled=False
             )
